@@ -4,14 +4,197 @@
   <meta charset="UTF-8">
   <title>To-Do List</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+      --container-bg: #fff;
+      --text-color: #222;
+      --primary: #3a7bd5;
+      --input-bg: #fff;
+      --task-bg: #f1f7fa;
+      --task-completed-bg: #e0e7ef;
+      --task-completed-color: #b2bec3;
+      --delete-color: #ff7675;
+      --delete-hover: #d63031;
+    }
+    body {
+      background: var(--bg-gradient);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-color);
+      transition: background 0.3s, color 0.3s;
+    }
+    .container {
+      background: var(--container-bg);
+      padding: 2rem 2.5rem;
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(60, 60, 120, 0.15);
+      width: 350px;
+      text-align: center;
+      transition: background 0.3s;
+    }
+    h1 {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      letter-spacing: 1px;
+    }
+    #taskInput, #searchInput {
+      width: 70%;
+      padding: 0.6rem;
+      border: 1px solid #b2bec3;
+      border-radius: 6px;
+      font-size: 1rem;
+      outline: none;
+      background: var(--input-bg);
+      color: var(--text-color);
+      transition: border 0.2s, background 0.3s, color 0.3s;
+    }
+    #taskInput:focus, #searchInput:focus {
+      border: 1.5px solid var(--primary);
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      background: linear-gradient(90deg, var(--primary) 0%, #00d2ff 100%);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      margin-left: 0.5rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: linear-gradient(90deg, #00d2ff 0%, var(--primary) 100%);
+    }
+    #taskList {
+      list-style: none;
+      padding: 0;
+      margin-top: 2rem;
+      text-align: left;
+    }
+    #taskList li {
+      background: var(--task-bg);
+      margin-bottom: 0.7rem;
+      padding: 0.7rem 1rem;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 1rem;
+      box-shadow: 0 2px 8px rgba(60, 60, 120, 0.05);
+      transition: background 0.2s, color 0.3s;
+    }
+    #taskList li.completed {
+      text-decoration: line-through;
+      color: var(--task-completed-color);
+      background: var(--task-completed-bg);
+    }
+    .delete-btn {
+      background: none;
+      border: none;
+      color: var(--delete-color);
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .delete-btn:hover {
+      color: var(--delete-hover);
+    }
+    /* Dark mode styles */
+    body.dark {
+      --bg-gradient: linear-gradient(135deg, #232526 0%, #414345 100%);
+      --container-bg: #23272f;
+      --text-color: #f1f1f1;
+      --primary: #00d2ff;
+      --input-bg: #23272f;
+      --task-bg: #2c313a;
+      --task-completed-bg: #23272f;
+      --task-completed-color: #636e72;
+      --delete-color: #ff7675;
+      --delete-hover: #fab1a0;
+    }
+    .dark-toggle {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+      color: var(--primary);
+      transition: color 0.3s;
+    }
+    .search-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
 </head>
 <body>
+  <button class="dark-toggle" id="darkToggle" title="Toggle dark mode">🌙</button>
   <div class="container">
     <h1>My To-Do List</h1>
-    <input type="text" id="taskInput" placeholder="Add a new task...">
-    <button onclick="addTask()">Add</button>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search tasks...">
+    </div>
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+      <input type="text" id="taskInput" placeholder="Add a new task...">
+      <button onclick="addTask()">Add</button>
+    </div>
     <ul id="taskList"></ul>
   </div>
-  <script src="script.js"></script>
+  <script>
+    // Dark mode toggle
+    const darkToggle = document.getElementById('darkToggle');
+    darkToggle.onclick = function() {
+      document.body.classList.toggle('dark');
+      darkToggle.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+    };
+
+    // Task management
+    function addTask() {
+      const input = document.getElementById('taskInput');
+      const taskText = input.value.trim();
+      if (taskText === '') return;
+      const li = document.createElement('li');
+      li.textContent = taskText;
+      li.onclick = function() {
+        li.classList.toggle('completed');
+      };
+      const delBtn = document.createElement('button');
+      delBtn.textContent = '✕';
+      delBtn.className = 'delete-btn';
+      delBtn.onclick = function(e) {
+        e.stopPropagation();
+        li.remove();
+      };
+      li.appendChild(delBtn);
+      document.getElementById('taskList').appendChild(li);
+      input.value = '';
+      input.focus();
+      filterTasks(); // Keep filter in sync
+    }
+    document.getElementById('taskInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') addTask();
+    });
+
+    // Search filter
+    function filterTasks() {
+      const filter = document.getElementById('searchInput').value.toLowerCase();
+      const tasks = document.querySelectorAll('#taskList li');
+      tasks.forEach(li => {
+        const text = li.childNodes[0].nodeValue.toLowerCase();
+        li.style.display = text.includes(filter) ? '' : 'none';
+      });
+    }
+    document.getElementById('searchInput').addEventListener('input', filterTasks);
+  </script>
 </body>
 </html>
